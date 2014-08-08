@@ -8,16 +8,16 @@ Requiremets
 1. the [pngquant](http://pngquant.org/) command-line utility
 
 
-How to build
--------------------------
+How to build without zephir
+---------------------------
 
 Compile phppngquant:
 
     cd phppngquant/ext
     phpize .
     ./configure
-    ./make
-    ./make install
+    make
+    make install
 
 Add extension to your php.ini
 
