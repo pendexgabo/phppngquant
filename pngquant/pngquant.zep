@@ -90,6 +90,30 @@ class Pngquant {
 	}
 
 	/**
+	 * Opens and reads the file
+	 * 
+	 * @return string; the content of the file
+	 * @throws Exception\IOErrorException if the source file can't be readed
+	 */
+	protected function _readSourceFile() -> string {
+
+		var blob;
+
+		if stream_is_local($this->path) && (!is_file($this->path) || !is_readable($this->path)) {
+			throw new Exception\IOErrorException(sprintf("unable to open '%s' file", $this->path));
+		}
+
+		let blob = file_get_contents($this->path);
+
+		if blob === false {
+			throw new Exception\IOErrorException(sprintf("unable to read '%s' file", $this->path));
+		}
+
+		return blob;
+
+	}
+
+	/**
 	 * Run the pngquant binary. This method takes care of checking if the file
 	 * is readable and spawning a a pngquant process in order to compress the image
 	 * 
@@ -102,11 +126,7 @@ class Pngquant {
 		// buffer the image
 		if $this->processed == false {
 
-			if !is_file($this->path) || !is_readable($this->path) {
-				throw new Exception\IOErrorException(sprintf("unable to open '%s' file", $this->path));
-			}
-
-			var args, descriptorspec, pipes, status, fd;
+			var args, descriptorspec, pipes, status, fd, source;
 
 			let args = $this->_processArgs();
 			let pipes = [];
@@ -117,7 +137,13 @@ class Pngquant {
 					2 : ["pipe", "w"]
 					];
 
-			let fd = proc_open(self::pngquant . " " . args . " - < " . escapeshellarg($this->path), descriptorspec, pipes);
+			let source = $this->_readSourceFile();
+
+			let fd = proc_open(self::pngquant . " " . args . " -", descriptorspec, pipes);
+
+			fwrite($pipes[0], source); // write the
+
+			let source = null;
 
 			let $this->blob = stream_get_contents(pipes[1]);
 			
@@ -158,8 +184,8 @@ class Pngquant {
 	 * @return void
 	 */
 	public function setImage(string path) -> void {
-		let $this->path = path;
 		let $this->processed = false;
+		let $this->path = path;
 	}
 
 	/**
@@ -180,13 +206,15 @@ class Pngquant {
 	 */
 	public function compress(string new_path = null) -> void {
 
-		var save;
+		var save, retval;
 
 		$this->_processFile();
 
 		let save = (new_path !== null) ? new_path : $this->path;
 
-		if file_put_contents(save, $this->blob) == 0 {
+		let retval = file_put_contents(save, $this->blob);
+
+		if retval == 0 || retval === false {
 			throw new Exception\IOErrorException(sprintf("unable to write to '%s'", save));
 		}
 
