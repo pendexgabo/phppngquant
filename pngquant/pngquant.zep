@@ -4,11 +4,11 @@ use Exception\BinaryNotFoundException;
 use Exception\IOErrorException;
 
 /**
- * A wrapper for the pngquant utility
+ * A wrapper for the pngquant command line utility
  * @link http://pngquant.org/
  *
- * Currently this call in only compatible with POXIS enviroments,
- * no Mi*soft Windows compatibility is intented at all
+ * Currently this class in only compatible with POXIS enviroments,
+ * no Mi*soft compatibility is intented at all
  */
 class Pngquant {
 
@@ -23,7 +23,16 @@ class Pngquant {
 
 
 	/**
-	 * Runs the requires checks for the class to work.
+	 * Returns the path to the pngquant binary
+	 * 
+	 * @return string the path to the pngquant binary
+	 */
+	public static function pngquantBin() -> string {
+		return self::pngquant;
+	}
+
+	/**
+	 * Runs the required checks for the class to work.
 	 * the method first read the <b>pngquant_path</b> ini setting
 	 * if the setting is undefined the class will try to <i>guess</i> the
 	 * path of the command line utility. Otherwise an exception is raised
@@ -90,10 +99,10 @@ class Pngquant {
 	}
 
 	/**
-	 * Opens and reads the file
+	 * Opens and reads the source stream.
 	 * 
-	 * @return string; the content of the file
-	 * @throws Exception\IOErrorException if the source file can't be readed
+	 * @return string; (blob) the content of the stream
+	 * @throws Exception\IOErrorException if the source stream can't be opened or readed
 	 */
 	protected function _readSourceFile() -> string {
 
@@ -114,8 +123,12 @@ class Pngquant {
 	}
 
 	/**
-	 * Run the pngquant binary. This method takes care of checking if the file
-	 * is readable and spawning a a pngquant process in order to compress the image
+	 * Run the pngquant binary. This method takes care of spawning a
+	 * pngquant process in order to compress the image.
+	 * The pngquant command line will take the source image from <i>stdin</i>
+	 * and return the result to <i>stdout</i>
+	 * In order to see the result of the operation we read the value
+	 * of the exit code.
 	 * 
 	 * @return void
 	 * @throws Exception\IOErrorException if the source file can't be readed
@@ -167,6 +180,8 @@ class Pngquant {
 
 	/**
 	 * The constructor method
+	 *
+	 * @return void
 	 */
 	public function __construct(string path = null) {
 
@@ -180,7 +195,7 @@ class Pngquant {
 	/**
 	 * Sets the path of the image to compress
 	 * 
-	 * @param $path the path of the image to compress
+	 * @param $path; the path of the image to compress
 	 * @return void
 	 */
 	public function setImage(string path) -> void {
@@ -189,18 +204,11 @@ class Pngquant {
 	}
 
 	/**
-	 * Sets the path of the image to compress
-	 * 
-	 * @return string the path to the pngquant binary
-	 */
-	public function pngquantBin() -> string {
-		return self::pngquant;
-	}
-
-	/**
 	 * The public wrapper for the compression process.
+	 * If you $new_path is not set the original path is used to save
+	 * the compressded file.
 	 * 
-	 * @param string|void the new file path where the compressed image should be saved
+	 * @param string|void the new path where the compressed image should be saved
 	 * @return void
 	 * @throws Exception\IOErrorException if the destination file can't be writen
 	 */
@@ -221,7 +229,7 @@ class Pngquant {
 	}
 
 	/**
-	 * Return the blob of the image compressed
+	 * Return the blob of the compressed image
 	 * 
 	 * @return string $blob
 	 */

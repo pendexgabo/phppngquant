@@ -12,10 +12,10 @@
 #include <Zend/zend_interfaces.h>
 
 #include "kernel/main.h"
+#include "kernel/object.h"
 #include "kernel/memory.h"
 #include "kernel/fcall.h"
 #include "kernel/operators.h"
-#include "kernel/object.h"
 #include "kernel/exception.h"
 #include "kernel/file.h"
 #include "kernel/array.h"
@@ -23,11 +23,11 @@
 
 
 /**
- * A wrapper for the pngquant utility
+ * A wrapper for the pngquant command line utility
  * @link http://pngquant.org/
  *
- * Currently this call in only compatible with POXIS enviroments,
- * no Mi*soft Windows compatibility is intented at all
+ * Currently this class in only compatible with POXIS enviroments,
+ * no Mi*soft compatibility is intented at all
  */
 ZEPHIR_INIT_CLASS(Pngquant_Pngquant) {
 
@@ -52,7 +52,22 @@ ZEPHIR_INIT_CLASS(Pngquant_Pngquant) {
 }
 
 /**
- * Runs the requires checks for the class to work.
+ * Returns the path to the pngquant binary
+ * 
+ * @return string the path to the pngquant binary
+ */
+PHP_METHOD(Pngquant_Pngquant, pngquantBin) {
+
+	zval *_0;
+
+
+	_0 = zephir_fetch_static_property_ce(pngquant_pngquant_ce, SL("pngquant") TSRMLS_CC);
+	RETURN_CTORW(_0);
+
+}
+
+/**
+ * Runs the required checks for the class to work.
  * the method first read the <b>pngquant_path</b> ini setting
  * if the setting is undefined the class will try to <i>guess</i> the
  * path of the command line utility. Otherwise an exception is raised
@@ -93,7 +108,7 @@ PHP_METHOD(Pngquant_Pngquant, _doChecks) {
 		object_init_ex(_6, pngquant_exception_binarynotfoundexception_ce);
 		ZEPHIR_CALL_METHOD(NULL, _6, "__construct", NULL);
 		zephir_check_call_status();
-		zephir_throw_exception_debug(_6, "pngquant/pngquant.zep", 47 TSRMLS_CC);
+		zephir_throw_exception_debug(_6, "pngquant/pngquant.zep", 56 TSRMLS_CC);
 		ZEPHIR_MM_RESTORE();
 		return;
 	}
@@ -128,28 +143,28 @@ PHP_METHOD(Pngquant_Pngquant, _processArgs) {
 	if (_1) {
 		_3 = zephir_fetch_nproperty_this(this_ptr, SL("min_quality"), PH_NOISY_CC);
 		if (ZEPHIR_GT_LONG(_3, 100)) {
-			ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_OutOfBoundsException, "min quality should be lower than 100", "pngquant/pngquant.zep", 66);
+			ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_OutOfBoundsException, "min quality should be lower than 100", "pngquant/pngquant.zep", 75);
 			return;
 		}
 		_4 = zephir_fetch_nproperty_this(this_ptr, SL("min_quality"), PH_NOISY_CC);
 		if (ZEPHIR_LT_LONG(_4, 0)) {
-			ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_OutOfBoundsException, "min quality should be greater than 0", "pngquant/pngquant.zep", 70);
+			ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_OutOfBoundsException, "min quality should be greater than 0", "pngquant/pngquant.zep", 79);
 			return;
 		}
 		_5 = zephir_fetch_nproperty_this(this_ptr, SL("max_quality"), PH_NOISY_CC);
 		if (ZEPHIR_GT_LONG(_5, 100)) {
-			ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_OutOfBoundsException, "max quality should be lower than 100", "pngquant/pngquant.zep", 74);
+			ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_OutOfBoundsException, "max quality should be lower than 100", "pngquant/pngquant.zep", 83);
 			return;
 		}
 		_6 = zephir_fetch_nproperty_this(this_ptr, SL("max_quality"), PH_NOISY_CC);
 		if (ZEPHIR_LT_LONG(_6, 0)) {
-			ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_OutOfBoundsException, "max quality should be greater than 0", "pngquant/pngquant.zep", 78);
+			ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_OutOfBoundsException, "max quality should be greater than 0", "pngquant/pngquant.zep", 87);
 			return;
 		}
 		_7 = zephir_fetch_nproperty_this(this_ptr, SL("min_quality"), PH_NOISY_CC);
 		_8 = zephir_fetch_nproperty_this(this_ptr, SL("max_quality"), PH_NOISY_CC);
 		if (ZEPHIR_GT(_7, _8)) {
-			ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_RangeException, "min quality should be lower than max quality", "pngquant/pngquant.zep", 82);
+			ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_RangeException, "min quality should be lower than max quality", "pngquant/pngquant.zep", 91);
 			return;
 		}
 		_9 = zephir_fetch_nproperty_this(this_ptr, SL("min_quality"), PH_NOISY_CC);
@@ -164,10 +179,10 @@ PHP_METHOD(Pngquant_Pngquant, _processArgs) {
 }
 
 /**
- * Opens and reads the file
+ * Opens and reads the source stream.
  * 
- * @return string; the content of the file
- * @throws Exception\IOErrorException if the source file can't be readed
+ * @return string; (blob) the content of the stream
+ * @throws Exception\IOErrorException if the source stream can't be opened or readed
  */
 PHP_METHOD(Pngquant_Pngquant, _readSourceFile) {
 
@@ -206,7 +221,7 @@ PHP_METHOD(Pngquant_Pngquant, _readSourceFile) {
 		zephir_check_call_status();
 		ZEPHIR_CALL_METHOD(NULL, _11, "__construct", &_16, _14);
 		zephir_check_call_status();
-		zephir_throw_exception_debug(_11, "pngquant/pngquant.zep", 103 TSRMLS_CC);
+		zephir_throw_exception_debug(_11, "pngquant/pngquant.zep", 112 TSRMLS_CC);
 		ZEPHIR_MM_RESTORE();
 		return;
 	}
@@ -223,7 +238,7 @@ PHP_METHOD(Pngquant_Pngquant, _readSourceFile) {
 		zephir_check_call_status();
 		ZEPHIR_CALL_METHOD(NULL, _11, "__construct", &_16, _14);
 		zephir_check_call_status();
-		zephir_throw_exception_debug(_11, "pngquant/pngquant.zep", 109 TSRMLS_CC);
+		zephir_throw_exception_debug(_11, "pngquant/pngquant.zep", 118 TSRMLS_CC);
 		ZEPHIR_MM_RESTORE();
 		return;
 	}
@@ -232,8 +247,12 @@ PHP_METHOD(Pngquant_Pngquant, _readSourceFile) {
 }
 
 /**
- * Run the pngquant binary. This method takes care of checking if the file
- * is readable and spawning a a pngquant process in order to compress the image
+ * Run the pngquant binary. This method takes care of spawning a
+ * pngquant process in order to compress the image.
+ * The pngquant command line will take the source image from <i>stdin</i>
+ * and return the result to <i>stdout</i>
+ * In order to see the result of the operation we read the value
+ * of the exit code.
  * 
  * @return void
  * @throws Exception\IOErrorException if the source file can't be readed
@@ -264,7 +283,7 @@ PHP_METHOD(Pngquant_Pngquant, _processFile) {
 		ZEPHIR_INIT_NVAR(_2);
 		ZVAL_STRING(_2, "r", 1);
 		zephir_array_fast_append(_1, _2);
-		zephir_array_update_long(&descriptorspec, 0, &_1, PH_COPY, "pngquant/pngquant.zep", 138);
+		zephir_array_update_long(&descriptorspec, 0, &_1, PH_COPY, "pngquant/pngquant.zep", 151);
 		ZEPHIR_INIT_NVAR(_1);
 		array_init_size(_1, 3);
 		ZEPHIR_INIT_NVAR(_2);
@@ -273,7 +292,7 @@ PHP_METHOD(Pngquant_Pngquant, _processFile) {
 		ZEPHIR_INIT_NVAR(_2);
 		ZVAL_STRING(_2, "w", 1);
 		zephir_array_fast_append(_1, _2);
-		zephir_array_update_long(&descriptorspec, 1, &_1, PH_COPY, "pngquant/pngquant.zep", 138);
+		zephir_array_update_long(&descriptorspec, 1, &_1, PH_COPY, "pngquant/pngquant.zep", 151);
 		ZEPHIR_INIT_NVAR(_1);
 		array_init_size(_1, 3);
 		ZEPHIR_INIT_NVAR(_2);
@@ -282,7 +301,7 @@ PHP_METHOD(Pngquant_Pngquant, _processFile) {
 		ZEPHIR_INIT_NVAR(_2);
 		ZVAL_STRING(_2, "w", 1);
 		zephir_array_fast_append(_1, _2);
-		zephir_array_update_long(&descriptorspec, 2, &_1, PH_COPY, "pngquant/pngquant.zep", 138);
+		zephir_array_update_long(&descriptorspec, 2, &_1, PH_COPY, "pngquant/pngquant.zep", 151);
 		ZEPHIR_CALL_METHOD(&source, this_ptr, "_readsourcefile",  NULL);
 		zephir_check_call_status();
 		zephir_read_static_property_ce(&_3, pngquant_pngquant_ce, SL("pngquant") TSRMLS_CC);
@@ -321,7 +340,7 @@ PHP_METHOD(Pngquant_Pngquant, _processFile) {
 			zephir_check_call_status();
 			ZEPHIR_CALL_METHOD(NULL, _16, "__construct", NULL, _19);
 			zephir_check_call_status();
-			zephir_throw_exception_debug(_16, "pngquant/pngquant.zep", 160 TSRMLS_CC);
+			zephir_throw_exception_debug(_16, "pngquant/pngquant.zep", 173 TSRMLS_CC);
 			ZEPHIR_MM_RESTORE();
 			return;
 		}
@@ -333,6 +352,8 @@ PHP_METHOD(Pngquant_Pngquant, _processFile) {
 
 /**
  * The constructor method
+ *
+ * @return void
  */
 PHP_METHOD(Pngquant_Pngquant, __construct) {
 
@@ -363,7 +384,7 @@ PHP_METHOD(Pngquant_Pngquant, __construct) {
 /**
  * Sets the path of the image to compress
  * 
- * @param $path the path of the image to compress
+ * @param $path; the path of the image to compress
  * @return void
  */
 PHP_METHOD(Pngquant_Pngquant, setImage) {
@@ -384,24 +405,11 @@ PHP_METHOD(Pngquant_Pngquant, setImage) {
 }
 
 /**
- * Sets the path of the image to compress
- * 
- * @return string the path to the pngquant binary
- */
-PHP_METHOD(Pngquant_Pngquant, pngquantBin) {
-
-	zval *_0;
-
-
-	_0 = zephir_fetch_static_property_ce(pngquant_pngquant_ce, SL("pngquant") TSRMLS_CC);
-	RETURN_CTORW(_0);
-
-}
-
-/**
  * The public wrapper for the compression process.
+ * If you $new_path is not set the original path is used to save
+ * the compressded file.
  * 
- * @param string|void the new file path where the compressed image should be saved
+ * @param string|void the new path where the compressed image should be saved
  * @return void
  * @throws Exception\IOErrorException if the destination file can't be writen
  */
@@ -448,7 +456,7 @@ PHP_METHOD(Pngquant_Pngquant, compress) {
 		zephir_check_call_status();
 		ZEPHIR_CALL_METHOD(NULL, _2, "__construct", NULL, _4);
 		zephir_check_call_status();
-		zephir_throw_exception_debug(_2, "pngquant/pngquant.zep", 218 TSRMLS_CC);
+		zephir_throw_exception_debug(_2, "pngquant/pngquant.zep", 226 TSRMLS_CC);
 		ZEPHIR_MM_RESTORE();
 		return;
 	}
@@ -457,7 +465,7 @@ PHP_METHOD(Pngquant_Pngquant, compress) {
 }
 
 /**
- * Return the blob of the image compressed
+ * Return the blob of the compressed image
  * 
  * @return string $blob
  */
