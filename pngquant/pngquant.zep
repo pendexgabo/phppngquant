@@ -7,7 +7,7 @@ use Exception\IOErrorException;
  * A wrapper for the pngquant command line utility
  * @link http://pngquant.org/
  *
- * Currently this class in only compatible with POXIS enviroments,
+ * Currently this class in only compatible with POSIX enviroments,
  * no Mi*soft compatibility is intented at all
  */
 class Pngquant {
